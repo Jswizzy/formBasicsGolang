@@ -34,9 +34,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 			// code for empty field
 			fmt.Println("username was left blank.")
 		} else {
-			fmt.Println("username:", r.Form["username"])
+			fmt.Println("username:", template.HTMLEscapeString(r.Form.Get("username")))
 		}
-		fmt.Println("password:", r.Form["password"])
+		fmt.Println("password:", template.HTMLEscapeString(r.Form.Get("password")))
 	}
 }
 
