@@ -1,11 +1,15 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
@@ -23,20 +27,28 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method) //get request method
+	fmt.Println("method:", r.Method) // get request method
 	if r.Method == "GET" {
+		crutime := time.Now().Unix()
+		h := md5.New()
+		io.WriteString(h, strconv.FormatInt(crutime, 10))
+		token := fmt.Sprintf("%x", h.Sum(nil))
+
 		t, _ := template.ParseFiles("html/login.html")
-		t.Execute(w, nil)
+		t.Execute(w, token)
 	} else {
+		// log in request
 		r.ParseForm()
-		// logic part of log in
-		if len(r.Form.Get("username")) == 0 {
-			// code for empty field
-			fmt.Println("username was left blank.")
+		token := r.Form.Get("token")
+		if token != "" {
+			// check token validity
 		} else {
-			fmt.Println("username:", template.HTMLEscapeString(r.Form.Get("username")))
+			// give error if no token
 		}
+		fmt.Println("username length:", len(r.Form["username"][0]))
+		fmt.Println("username:", template.HTMLEscapeString(r.Form.Get("username"))) // print in server side
 		fmt.Println("password:", template.HTMLEscapeString(r.Form.Get("password")))
+		template.HTMLEscape(w, []byte(r.Form.Get("username"))) // respond to client
 	}
 }
 
